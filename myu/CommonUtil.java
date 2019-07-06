@@ -1,387 +1,575 @@
-package com.ruanmeng.utils;
+package com.meida.shaokaoshop.utils;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
-import java.text.ParseException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Hashtable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Date;
+
 
 public class CommonUtil {
-    public static void showToast(Context context, String tip) {
-        Toast.makeText(context, tip, Toast.LENGTH_SHORT).show();
-    }
-    public static boolean checkNetState(Context context) {
-        boolean netstate = false;
-        ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivity != null) {
-            @SuppressWarnings("deprecation")
-            NetworkInfo[] info = connectivity.getAllNetworkInfo();
-            if (info != null) {
-                for (int i = 0; i < info.length; i++) {
-                    if (info[i].getState() == NetworkInfo.State.CONNECTED) {
-                        netstate = true;
-                        break;
-                    }
-                }
-            }
-        }
-        return netstate;
-    }
-
-    public static void showToask(Context context, String tip) {
-        Toast.makeText(context, tip, Toast.LENGTH_SHORT).show();
-    }
-    /**
-     * 获取版本名称
-     * @param context
-     * @return String
-     */
-    public static String getVersion(Context context) {
-        String version = "";
-        try {
-            PackageManager manager = context.getPackageManager();
-            PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
-            version = info.versionName;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return version;
-    }
-    public static int getScreenWidth(Context context) {
-        WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = manager.getDefaultDisplay();
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        display.getMetrics(outMetrics);
-        return outMetrics.widthPixels;
-        //return display.getWidth();
-    }
-
-    public static int getScreenHeight(Context context) {
-        WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = manager.getDefaultDisplay();
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        display.getMetrics(outMetrics);
-        return outMetrics.heightPixels;
-        //return display.getHeight();
-    }
-
-    //dip转像素值
-    public static int dip2px(Context context, double d) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (d * scale + 0.5f);
-    }
-
-    //像素值转dip
-    public static int px2dip(Context context, float pxValue) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (pxValue / scale + 0.5f);
-    }
-
-    public static int sp2px(Context context, float spValue) {
-        final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
-        return (int) (spValue * fontScale + 0.5f);
-    }
-
-    /**
-     * 是否是手机号
-     */
-    public static boolean isMobileNumber(String mobile) {
-        if (mobile.length() != 11) return false;
-        // "^((\\d{7,8})|(0\\d{2,3}-\\d{7,8})|(1[34578]\\d{9}))$"
-        Pattern p = Pattern.compile("^((1[3|5|8][0-9])|(14[5|7])|(17[0|1|6|7|8]))\\d{8}$");
-        Matcher m = p.matcher(mobile);
-        return m.matches();
-    }
-
-    /**
-     * 是否是固话
-     */
-    public static boolean isTel(String tel) {
-        Pattern p = Pattern.compile("^((\\d{7,8})|(0\\d{2,3}-\\d{7,8})|(1[34578]\\d{9}))$");
-        Matcher m = p.matcher(tel);
-        return m.matches();
-    }
-
-    /**
-     * 是否是邮箱
-     */
-    public static boolean isEmail(String strEmail) {
-        // String strPattern =
-        // "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
-        String strPattern = "^\\s*\\w+(?:\\.{0,1}[\\w-]+)*@[a-zA-Z0-9]+(?:[-.][a-zA-Z0-9]+)*\\.[a-zA-Z]+\\s*$";
-
-        Pattern p = Pattern.compile(strPattern);
-        Matcher m = p.matcher(strEmail);
-        return m.matches();
-    }
-
-    /**
-     * 是否是网址
-     */
-    public static boolean isWeb(String strWeb) {
-        String strPattern = "(http://|ftp://|https://|www){0,1}[^\u4e00-\u9fa5\\s]*?\\.(com|net|cn|me|tw|fr)[^\u4e00-\u9fa5\\s]*";
-
-        Pattern p = Pattern.compile(strPattern);
-        Matcher m = p.matcher(strWeb);
-        return m.matches();
-    }
-
-    /**
-     * 功能：身份证的有效验证
-     *
-     * @param IDStr 身份证号
-     * @return 有效：返回"" 无效：返回String信息
-     * @throws ParseException
-     */
-    public static boolean IDCardValidate(String IDStr) throws ParseException {
-        @SuppressWarnings("unused")
-        String errorInfo = "";// 记录错误信息
-        String[] ValCodeArr = {"1", "0", "x", "9", "8", "7", "6", "5", "4", "3", "2"};
-        String[] Wi = {"7", "9", "10", "5", "8", "4", "2", "1", "6", "3", "7",
-                "9", "10", "5", "8", "4", "2"};
-        String Ai = "";
-        // ================ 号码的长度 15位或18位 ================
-        if (IDStr.length() != 15 && IDStr.length() != 18) {
-            errorInfo = "身份证号码长度应该为15位或18位";
-            return false;
-        }
-        // ================ 数字 除最后一位都为数字 ================
-        if (IDStr.length() == 18) Ai = IDStr.substring(0, 17);
-        else if (IDStr.length() == 15)
-            Ai = IDStr.substring(0, 6) + "19" + IDStr.substring(6, 15);
-        if (!isNumeric(Ai)) {
-            errorInfo = "身份证15位号码都应为数字 ; 18位号码除最后一位外，都应为数字";
-            return false;
-        }
-        // ================ 出生年月是否有效 ================
-        String strYear = Ai.substring(6, 10);// 年份
-        String strMonth = Ai.substring(10, 12);// 月份
-        String strDay = Ai.substring(12, 14);// 月份
-        if (!isDataFormat(strYear + "-" + strMonth + "-" + strDay)) {
-            errorInfo = "身份证生日无效";
-            return false;
-        }
-        GregorianCalendar gc = new GregorianCalendar();
-        SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            if ((gc.get(Calendar.YEAR) - Integer.parseInt(strYear)) > 150
-                    || (gc.getTime().getTime() - s.parse(
-                    strYear + "-" + strMonth + "-" + strDay).getTime()) < 0) {
-                errorInfo = "身份证生日不在有效范围";
-                return false;
-            }
-        } catch (NumberFormatException | ParseException e) {
-            e.printStackTrace();
-        }
-        if (Integer.parseInt(strMonth) > 12 || Integer.parseInt(strMonth) == 0) {
-            errorInfo = "身份证月份无效";
-            return false;
-        }
-        if (Integer.parseInt(strDay) > 31 || Integer.parseInt(strDay) == 0) {
-            errorInfo = "身份证日期无效";
-            return false;
-        }
-        // ================ 地区码时候有效 ================
-        @SuppressWarnings("rawtypes")
-        Hashtable h = GetAreaCode();
-        if (h.get(Ai.substring(0, 2)) == null) {
-            errorInfo = "身份证地区编码错误";
-            return false;
-        }
-        // ================ 判断最后一位的值 ================
-        int TotalmulAiWi = 0;
-        for (int i = 0; i < 17; i++) {
-            TotalmulAiWi = TotalmulAiWi
-                    + Integer.parseInt(String.valueOf(Ai.charAt(i)))
-                    * Integer.parseInt(Wi[i]);
-        }
-        int modValue = TotalmulAiWi % 11;
-        String strVerifyCode = ValCodeArr[modValue];
-        Ai = Ai + strVerifyCode;
-
-        if (IDStr.length() == 18) {
-            if (!Ai.equals(IDStr)) {
-                errorInfo = "身份证无效，不是合法的身份证号码";
-                return false;
-            }
-        } else return true;
-        return true;
-    }
-
-    /**
-     * 功能：设置地区编码
-     *
-     * @return Hashtable 对象
-     */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private static Hashtable GetAreaCode() {
-        Hashtable hashtable = new Hashtable();
-        hashtable.put("11", "北京");
-        hashtable.put("12", "天津");
-        hashtable.put("13", "河北");
-        hashtable.put("14", "山西");
-        hashtable.put("15", "内蒙古");
-        hashtable.put("21", "辽宁");
-        hashtable.put("22", "吉林");
-        hashtable.put("23", "黑龙江");
-        hashtable.put("31", "上海");
-        hashtable.put("32", "江苏");
-        hashtable.put("33", "浙江");
-        hashtable.put("34", "安徽");
-        hashtable.put("35", "福建");
-        hashtable.put("36", "江西");
-        hashtable.put("37", "山东");
-        hashtable.put("41", "河南");
-        hashtable.put("42", "湖北");
-        hashtable.put("43", "湖南");
-        hashtable.put("44", "广东");
-        hashtable.put("45", "广西");
-        hashtable.put("46", "海南");
-        hashtable.put("50", "重庆");
-        hashtable.put("51", "四川");
-        hashtable.put("52", "贵州");
-        hashtable.put("53", "云南");
-        hashtable.put("54", "西藏");
-        hashtable.put("61", "陕西");
-        hashtable.put("62", "甘肃");
-        hashtable.put("63", "青海");
-        hashtable.put("64", "宁夏");
-        hashtable.put("65", "新疆");
-        hashtable.put("71", "台湾");
-        hashtable.put("81", "香港");
-        hashtable.put("82", "澳门");
-        hashtable.put("91", "国外");
-        return hashtable;
-    }
-
-    /**
-     * 功能：判断字符串是否为数字
-     *
-     * @param str 字符串
-     * @return 布尔值
-     */
-    public static boolean isNumeric(String str) {
-        Pattern pattern = Pattern.compile("[0-9]*");
-        Matcher isNum = pattern.matcher(str);
-        return isNum.matches();
-    }
-
-    /**
-     * 验证日期字符串
-     *
-     * @param str 日期
-     */
-    public static boolean isDataFormat(String str) {
-        boolean flag = false;
-        //String regxStr="[1-9][0-9]{3}-[0-1][0-2]-((0[1-9])|([12][0-9])|(3[01]))";
-        String regxStr = "^((\\d{2}(([02468][048])|([13579][26]))[\\-\\/\\s]?((((0?[13578])|(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])))))|(\\d{2}(([02468][1235679])|([13579][01345789]))[\\-\\/\\s]?((((0?[13578])|(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?((0?[1-9])|(1[0-9])|(2[0-8]))))))(\\s(((0?[0-9])|([1-2][0-3]))\\:([0-5]?[0-9])((\\s)|(\\:([0-5]?[0-9])))))?$";
-        Pattern pattern1 = Pattern.compile(regxStr);
-        Matcher isNo = pattern1.matcher(str);
-        if (isNo.matches()) flag = true;
-        return flag;
-    }
-
-    /**
-     * 获取EditText的内容
-     *
-     * @param editText
-     * @return
-     */
-    public static String getEditText(EditText editText) {
-        return editText.getText().toString().trim();
-    }
-
-    /**
-     * 获取TextView的内容
-     *
-     * @param textView
-     * @return
-     */
-    public static String getTextView(TextView textView) {
-        return textView.getText().toString().trim();
-    }
-    /**
-     * 把十六进制字符串转换成字节型
-     *
-     * @param str
-     * @return
-     */
-    public static byte[] StringToByte(String str) {
-        //如果字符串长度不为偶数，则追加0
-        if (str.length() % 2 != 0) {
-            str = "0" + str;
-        }
-        byte[] b = new byte[str.length() / 2];
-        byte c1, c2;
-        for (int y = 0, x = 0; x < str.length(); ++y, ++x) {
-            c1 = (byte) str.charAt(x);
-            if (c1 > 0x60) c1 -= 0x57;
-            else if (c1 > 0x40) c1 -= 0x37;
-            else c1 -= 0x30;
-            c2 = (byte) str.charAt(++x);
-            if (c2 > 0x60) c2 -= 0x57;
-            else if (c2 > 0x40) c2 -= 0x37;
-            else c2 -= 0x30;
-            b[y] = (byte) ((c1 << 4) + c2);
-        }
-        return b;
-    }
 
 
-    public static byte[] StringZuToByte(String str){
 
-        String[]strs=str.split(" ");
-        byte[] bytes = new byte[strs.length];
-        try {
+	public static boolean isToday(String str){
+		try {
+			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			Date date = fmt.parse(str);
+			if (fmt.format(date).toString().equals(fmt.format(new Date()).toString())) {//格式化为相同格式
+				return true;
+			} else {
+				return false;
+			}
+		}catch (Exception e){
 
+		}
+		return false;
 
-            for (int i = 0; i < strs.length; i++) {
-                if(strs[i].equals("90")){
-                    bytes[i]=90;
-                }else {
-                    bytes[i] = Byte.decode("0x" + strs[i]);
-                }
-            }
-        }catch (Exception e){
-            System.out.print("");
-        }
-        return bytes;
-    }
+	}
 
 
-    /**
-     *
-     * 16进制转2进制
-     * @param hexString
-     * @return
-     */
 
-    public static String hexString2binaryString(String hexString)
-    {
-        if (hexString == null || hexString.length() % 2 != 0)
-            return null;
-        String bString = "", tmp;
-        for (int i = 0; i < hexString.length(); i++)
-        {
-            tmp = "0000"
-                    + Integer.toBinaryString(Integer.parseInt(hexString
-                    .substring(i, i + 1), 16));
-            bString += tmp.substring(tmp.length() - 4);
-        }
-        return bString;
-    }
+	public static String getMonth(String str){
+		try {
+			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			Date date = fmt.parse(str);
+			String m=(date.getMonth()+1)+"";
+		    return  (date.getMonth()+1)+"";
+		}catch (Exception e){
+
+		}
+		return "";
+
+	}
+
+	public static String getDay(String str){
+		try {
+			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			Date date = fmt.parse(str);
+			Calendar calendar= Calendar.getInstance();
+			calendar.setTime(date);
+		    //String m=fmt.getCalendar().get(Calendar.DAY_OF_MONTH)+"";
+			return fmt.getCalendar().get(Calendar.DAY_OF_MONTH)+"";
+//			Date date = fmt.parse(str);
+//			String m=date.get+"";
+//			return  date.getDay()+"";
+		}catch (Exception e){
+
+		}
+		return "";
+
+	}
+
+	public static long dateToStamp(String datestr){
+		try {
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+			Date date = format.parse(datestr);
+			return date.getTime();
+		}catch (Exception e){
+
+		}
+		return 0;
+
+	}
+
+
+	public static void showInfoDialog(Context context, String message) {
+		showInfoDialog(context, message, "提示", "确定", null);
+	}
+
+	/**
+	 * 获取版本号
+	 *
+	 * @return 当前应用的版本号
+	 */
+	public static String getVersion(Context context) {
+		try {
+			PackageManager manager = context.getPackageManager();
+			PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
+			String version = info.versionName;
+			return version;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "1.0";
+		}
+	}
+
+
+	public static int getScreenWidth(Context context) {
+		WindowManager manager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+		Display display = manager.getDefaultDisplay();
+		return display.getWidth();
+	}
+
+	public static int getScreenHeight(Activity context) {
+		DisplayMetrics metric = new DisplayMetrics();
+		context.getWindowManager().getDefaultDisplay().getMetrics(metric);
+		return metric.heightPixels;
+	}
+
+
+	public static void showInfoDialog(Context context, String message,
+                                      String titleStr, String positiveStr,
+                                      DialogInterface.OnClickListener onClickListener) {
+		AlertDialog.Builder localBuilder = new AlertDialog.Builder(context);
+		localBuilder.setTitle(titleStr);
+		localBuilder.setMessage(message);
+		if (onClickListener == null)
+			onClickListener = new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+
+				}
+			};
+		localBuilder.setPositiveButton(positiveStr, onClickListener);
+		localBuilder.show();
+	}
+
+	public static String md5(String paramString) {
+		String returnStr;
+		try {
+			MessageDigest localMessageDigest = MessageDigest.getInstance("MD5");
+			localMessageDigest.update(paramString.getBytes());
+			returnStr = byteToHexString(localMessageDigest.digest());
+			return returnStr;
+		} catch (Exception e) {
+			return paramString;
+		}
+	}
+
+	/**
+	 * 将指定byte数组转换成16进制字符串
+	 *
+	 * @param b
+	 * @return
+	 */
+	public static String byteToHexString(byte[] b) {
+		StringBuffer hexString = new StringBuffer();
+		for (int i = 0; i < b.length; i++) {
+			String hex = Integer.toHexString(b[i] & 0xFF);
+			if (hex.length() == 1) {
+				hex = '0' + hex;
+			}
+			hexString.append(hex.toUpperCase());
+		}
+		return hexString.toString();
+	}
+
+	/**
+	 * 判断当前是否有可用的网络以及网络类型 0：无网络 1：WIFI 2：CMWAP 3：CMNET
+	 *
+	 * @param context
+	 * @return
+	 */
+	public static int isNetworkAvailable(Context context) {
+		ConnectivityManager connectivity = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (connectivity == null) {
+			return 0;
+		} else {
+			NetworkInfo[] info = connectivity.getAllNetworkInfo();
+			if (info != null) {
+				for (int i = 0; i < info.length; i++) {
+					if (info[i].getState() == NetworkInfo.State.CONNECTED) {
+						NetworkInfo netWorkInfo = info[i];
+						if (netWorkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+							return 1;
+						} else if (netWorkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+							String extraInfo = netWorkInfo.getExtraInfo();
+							if ("cmwap".equalsIgnoreCase(extraInfo)
+									|| "cmwap:gsm".equalsIgnoreCase(extraInfo)) {
+								return 2;
+							}
+							return 3;
+						}
+					}
+				}
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * 获取现在时间
+	 *
+	 * @return 返回短时间字符串格式yyyy-MM-dd HH:mm:ss
+	 */
+
+	public static String getStringDate() {
+		Date currentTime = new Date();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String dateString = formatter.format(currentTime);
+		return dateString;
+	}
+
+	/**
+	 * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
+	 */
+	public static int dip2px(Context context, float dpValue) {
+		final float scale = context.getResources().getDisplayMetrics().density;
+		return (int) (dpValue * scale + 0.5f);
+	}
+
+	public static int sp2px(Context context, float spValue) {
+		final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
+		return (int) (spValue * fontScale + 0.5f);
+	}
+
+	/**
+	 * 根据手机的分辨率从 px(像素) 的单位 转成为 dp
+	 */
+	public static int px2dip(Context context, float pxValue) {
+		final float scale = context.getResources().getDisplayMetrics().density;
+		return (int) (pxValue / scale + 0.5f);
+	}
+
+	public static int getScreenPicHeight(int screenWidth, Bitmap bitmap) {
+		int picWidth = bitmap.getWidth();
+		int picHeight = bitmap.getHeight();
+		int picScreenHeight = 0;
+		picScreenHeight = (screenWidth * picHeight) / picWidth;
+		return picScreenHeight;
+	}
+
+
+
+//	public static void bindViewSelector(Context context, final View view,
+//			String nornalImageurl, final String pressedImageUrl) {
+//		final StateListDrawable stateListDrawable = new StateListDrawable();
+//		final BitmapUtils utils = new BitmapUtils(context);
+//		utils.display(view, nornalImageurl, new BitmapLoadCallBack<View>() {
+//
+//			@Override
+//			public void onLoadCompleted(View container, String uri,
+//					Bitmap bitmap, BitmapDisplayConfig config,
+//					BitmapLoadFrom from) {
+//				Drawable normalDrawable = new BitmapDrawable(bitmap);
+//				stateListDrawable.addState(
+//						new int[] { android.R.attr.state_active },
+//						normalDrawable);
+//				stateListDrawable.addState(new int[] {
+//						android.R.attr.state_focused,
+//						android.R.attr.state_enabled }, normalDrawable);
+//				stateListDrawable.addState(
+//						new int[] { android.R.attr.state_enabled },
+//						normalDrawable);
+//				utils.display(container, pressedImageUrl,
+//						new BitmapLoadCallBack<View>() {
+//
+//							@Override
+//							public void onLoadCompleted(View container,
+//									String uri, Bitmap bitmap,
+//									BitmapDisplayConfig config,
+//									BitmapLoadFrom from) {
+//								stateListDrawable.addState(new int[] {
+//										android.R.attr.state_pressed,
+//										android.R.attr.state_enabled },
+//										new BitmapDrawable(bitmap));
+//
+//								view.setBackgroundDrawable(stateListDrawable);
+//
+//							}
+//
+//							@Override
+//							public void onLoadFailed(View container,
+//									String uri, Drawable drawable) {
+//
+//							}
+//						});
+//			}
+//
+//			@Override
+//			public void onLoadFailed(View container, String uri,
+//					Drawable drawable) {
+//
+//			}
+//		});
+//
+//	}
+
+	private static Drawable createDrawable(Drawable d, Paint p) {
+
+		BitmapDrawable bd = (BitmapDrawable) d;
+		Bitmap b = bd.getBitmap();
+		Bitmap bitmap = Bitmap.createBitmap(bd.getIntrinsicWidth(),
+				bd.getIntrinsicHeight(), Config.ARGB_8888);
+		Canvas canvas = new Canvas(bitmap);
+		canvas.drawBitmap(b, 0, 0, p); // 关键代码，使用新的Paint画原图，
+
+		return new BitmapDrawable(bitmap);
+	}
+
+	/** 设置Selector。 本次只增加点击变暗的效果，注释的代码为更多的效果 */
+	public static StateListDrawable createSLD(Context context, Drawable drawable) {
+		StateListDrawable bg = new StateListDrawable();
+		int brightness = 50 - 127;
+		ColorMatrix cMatrix = new ColorMatrix();
+		cMatrix.set(new float[] { 1, 0, 0, 0, brightness, 0, 1, 0, 0,
+				brightness,// 改变亮度
+				0, 0, 1, 0, brightness, 0, 0, 0, 1, 0 });
+
+		Paint paint = new Paint();
+		paint.setColorFilter(new ColorMatrixColorFilter(cMatrix));
+
+		Drawable normal = drawable;
+		Drawable pressed = createDrawable(drawable, paint);
+		bg.addState(new int[] { android.R.attr.state_pressed, }, pressed);
+		bg.addState(new int[] { android.R.attr.state_focused, }, pressed);
+		bg.addState(new int[] { android.R.attr.state_selected }, pressed);
+		bg.addState(new int[] {}, normal);
+		return bg;
+	}
+
+	public static Bitmap getImageFromAssetsFile(Context ct, String fileName) {
+		Bitmap image = null;
+		AssetManager am = ct.getAssets();
+		try {
+			InputStream is = am.open(fileName);
+			image = BitmapFactory.decodeStream(is);
+			is.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return image;
+
+	}
+
+	// public static <Params, Progress, Result> void executeAsyncTask(
+	// AsyncTask<Params, Progress, Result> task, Params... params) {
+	// if (Build.VERSION.SDK_INT >= 11) {
+	// task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
+	// } else {
+	// task.execute(params);
+	// }
+	// }
+
+	public static String getUploadtime(long created) {
+		StringBuffer when = new StringBuffer();
+		int difference_seconds;
+		int difference_minutes;
+		int difference_hours;
+		int difference_days;
+		int difference_months;
+		long curTime = System.currentTimeMillis();
+		difference_months = (int) (((curTime / 2592000) % 12) - ((created / 2592000) % 12));
+		if (difference_months > 0) {
+			when.append(difference_months + "月");
+		}
+
+		difference_days = (int) (((curTime / 86400) % 30) - ((created / 86400) % 30));
+		if (difference_days > 0) {
+			when.append(difference_days + "天");
+		}
+
+		difference_hours = (int) (((curTime / 3600) % 24) - ((created / 3600) % 24));
+		if (difference_hours > 0) {
+			when.append(difference_hours + "小时");
+		}
+
+		difference_minutes = (int) (((curTime / 60) % 60) - ((created / 60) % 60));
+		if (difference_minutes > 0) {
+			when.append(difference_minutes + "分钟");
+		}
+
+		difference_seconds = (int) ((curTime % 60) - (created % 60));
+		if (difference_seconds > 0) {
+			when.append(difference_seconds + "秒");
+		}
+
+		return when.append("前").toString();
+	}
+
+	// public static boolean hasToken(Context ct) {
+	// String token = SharePrefUtil.getString(ct, "token", "");
+	// if (TextUtils.isEmpty(token)) {
+	// return false;
+	// } else {
+	// return true;
+	// }
+	// }
+
+	public static void setListViewHeightBasedOnChildren(ListView listView) {
+		// 获取ListView对应的Adapter
+		ListAdapter listAdapter = listView.getAdapter();
+		if (listAdapter == null) {
+			return;
+		}
+		int totalHeight = 0;
+		for (int i = 0; i < listAdapter.getCount(); i++) { // listAdapter.getCount()返回数据项的数目
+			View listItem = listAdapter.getView(i, null, listView);
+			listItem.measure(0, 0); // 计算子项View 的宽高
+			totalHeight += listItem.getMeasuredHeight(); // 统计所有子项的总高度
+		}
+		ViewGroup.LayoutParams params = listView.getLayoutParams();
+		params.height = totalHeight
+				+ (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+		// listView.getDividerHeight()获取子项间分隔符占用的高度
+		// params.height最后得到整个ListView完整显示需要的高度
+		listView.setLayoutParams(params);
+	}
+
+	public static String formatDate() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		return sdf.format(new Date());
+	}
+
+
+	public static String getTotalCacheSize(Context context) throws Exception {
+		long cacheSize = getFolderSize(context.getCacheDir());
+		if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+			cacheSize += getFolderSize(context.getExternalCacheDir());
+		}
+		return getFormatSize(cacheSize);
+	}
+
+
+	public static void clearAllCache(Context context) {
+		deleteDir(context.getCacheDir());
+		if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+			deleteDir(context.getExternalCacheDir());
+		}
+	}
+
+	private static boolean deleteDir(File dir) {
+		if (dir != null && dir.isDirectory()) {
+			String[] children = dir.list();
+			for (int i = 0; i < children.length; i++) {
+				boolean success = deleteDir(new File(dir, children[i]));
+				if (!success) {
+					return false;
+				}
+			}
+		}
+		return dir.delete();
+	}
+
+	// 获取文件
+//Context.getExternalFilesDir() --> SDCard/Android/data/你的应用的包名/files/ 目录，一般放一些长时间保存的数据
+//Context.getExternalCacheDir() --> SDCard/Android/data/你的应用包名/cache/目录，一般存放临时缓存数据
+	public static long getFolderSize(File file) throws Exception {
+		long size = 0;
+		try {
+			File[] fileList = file.listFiles();
+			for (int i = 0; i < fileList.length; i++) {
+				// 如果下面还有文件
+				if (fileList[i].isDirectory()) {
+					size = size + getFolderSize(fileList[i]);
+				} else {
+					size = size + fileList[i].length();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return size;
+	}
+
+	/**
+	 * 格式化单位
+	 *
+	 * @param size
+	 * @return
+	 */
+	public static String getFormatSize(double size) {
+		double kiloByte = size / 1024;
+		if (kiloByte < 1) {
+//        return size + "Byte";  
+			return "0K";
+		}
+
+		double megaByte = kiloByte / 1024;
+		if (megaByte < 1) {
+			BigDecimal result1 = new BigDecimal(Double.toString(kiloByte));
+			return result1.setScale(2, BigDecimal.ROUND_HALF_UP)
+					.toPlainString() + "KB";
+		}
+
+		double gigaByte = megaByte / 1024;
+		if (gigaByte < 1) {
+			BigDecimal result2 = new BigDecimal(Double.toString(megaByte));
+			return result2.setScale(2, BigDecimal.ROUND_HALF_UP)
+					.toPlainString() + "MB";
+		}
+
+		double teraBytes = gigaByte / 1024;
+		if (teraBytes < 1) {
+			BigDecimal result3 = new BigDecimal(Double.toString(gigaByte));
+			return result3.setScale(2, BigDecimal.ROUND_HALF_UP)
+					.toPlainString() + "GB";
+		}
+		BigDecimal result4 = new BigDecimal(teraBytes);
+		return result4.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString()
+				+ "TB";
+	}
+
+
+	//保存文件到指定路径
+	public static boolean saveImageToGallery(Context context, Bitmap bmp) {
+		// 首先保存图片
+		String storePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "dearxy";
+		File appDir = new File(storePath);
+		if (!appDir.exists()) {
+			appDir.mkdir();
+		}
+		String fileName = System.currentTimeMillis() + ".jpg";
+		File file = new File(appDir, fileName);
+		try {
+			FileOutputStream fos = new FileOutputStream(file);
+			//通过io流的方式来压缩保存图片
+			boolean isSuccess = bmp.compress(Bitmap.CompressFormat.JPEG, 60, fos);
+			fos.flush();
+			fos.close();
+
+			//把文件插入到系统图库
+			//MediaStore.Images.Media.insertImage(context.getContentResolver(), file.getAbsolutePath(), fileName, null);
+
+			//保存图片后发送广播通知更新数据库
+			Uri uri = Uri.fromFile(file);
+			context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
+			if (isSuccess) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+
+
 }
